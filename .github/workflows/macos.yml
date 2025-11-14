@@ -32,7 +32,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
     needs: check_skip_flags_macos_latest
-    if: >
+    if: >-
       ${{
         (!contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP ALL]') &&
         !contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP MACOS]')) ||
