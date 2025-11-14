@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build on ${{ matrix.distro }} ${{ matrix.arch }} ${{ matrix.endianness }}
     needs: check_skip_flags_other_arch
-    if: ${{ !contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP ALL]') || contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[ENABLE OTHER-ARCH]') }}
+    if: ${{ (!contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP ALL]') && !contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) || contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[ENABLE OTHER-ARCH]') }}
     # if: >
     #   ${{ (!contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP ALL]') &&
     #   !contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) ||
