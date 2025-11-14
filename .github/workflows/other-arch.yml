@@ -41,10 +41,6 @@ jobs:
         !contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) ||
         contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[ENABLE OTHER-ARCH]')
       }}
-    # if: >
-    #   ${{ (!contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP ALL]') &&
-    #   !contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) ||
-    #    contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[ENABLE OTHER-ARCH]') }}
 
     # Run steps on a matrix of different arch/distro combinations
     strategy:

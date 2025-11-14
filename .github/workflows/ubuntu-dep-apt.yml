@@ -38,10 +38,6 @@ jobs:
         !contains(needs.check_skip_flags_ubuntu_dep_apt.outputs.head-commit-message, '[SKIP UBUNTU-DEP-APT]')) ||
         contains(needs.check_skip_flags_ubuntu_dep_apt.outputs.head-commit-message, '[ENABLE UBUNTU-DEP-APT]')
       }}
-    # if: >
-    #   ${{ (!contains(needs.check_skip_flags_ubuntu_dep_apt.outputs.head-commit-message, '[SKIP ALL]') &&
-    #   !contains(needs.check_skip_flags_ubuntu_dep_apt.outputs.head-commit-message, '[SKIP UBUNTU-DEP-APT]')) ||
-    #    contains(needs.check_skip_flags_ubuntu_dep_apt.outputs.head-commit-message, '[ENABLE UBUNTU-DEP-APT]') }}
 
     # if: ${{ !contains(github.event.head_commit.message, '[SKIP UBUNTU-DEP-APT]') && !contains(github.event.workflow_run.head_commit.message, '[SKIP UBUNTU-DEP-APT]') }}
     steps:
