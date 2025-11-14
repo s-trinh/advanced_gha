@@ -48,6 +48,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Print GitHub variables
+      run: |
+        echo "github.workflow: ${{ github.workflow }}"
+        echo "github.ref: ${{ github.ref }}"
+        echo "github.event.head_commit: ${{ github.event.head_commit }}"
+        echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
+
     - name: Run on arch
       uses: uraimo/run-on-arch-action@v3
       # See issue https://github.com/uraimo/run-on-arch-action/issues/155 for the explanation on the weird use of the arch and distro
@@ -60,7 +67,7 @@ jobs:
         base_image: "--platform=linux/${{ matrix.arch }} ${{ matrix.distro }}"
 
         install: |
-          apt-get update && apt-get install -y lsb-release git build-essential cmake gfortran liblapack-dev libeigen3-dev bsdmainutils xxd python3-numpy
+          apt-get update && apt-get install -y lsb-release git build-essential cmake gfortran liblapack-dev libeigen3-dev bsdmainutils xxd python3-numpy python-is-python3
 
         run: |
           current_dir=$(pwd)
@@ -108,7 +115,7 @@ jobs:
 
           printf '\n\n===ViSP-images data with NumPy===\n'
           printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
-          python print_npz.py -i visp_npz_test_data_cnpy_LE.npz
+          python3 print_npz.py -i visp_npz_test_data_cnpy_LE.npz
 
           printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
           python print_npz.py -i visp_npz_test_data_cnpy_BE.npz

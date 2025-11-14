@@ -22,6 +22,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Print GitHub variables
+      run: |
+        echo "github.workflow: ${{ github.workflow }}"
+        echo "github.ref: ${{ github.ref }}"
+        echo "github.event.head_commit: ${{ github.event.head_commit }}"
+        echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
+
     - name: Print system information
       run: lscpu
 
