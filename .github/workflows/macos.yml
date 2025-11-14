@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   # https://github.com/orgs/community/discussions/28474#discussioncomment-3350256
-  check_skip_flags_macos_latest:
+  check_skip_flags:
     name: Check skip flags
     runs-on: macos-latest
     outputs:
@@ -30,16 +30,17 @@ jobs:
         id: get_head_commit_message
         run: echo "::set-output name=headCommitMsg::$(git show -s --format=%s)"
 
-  build-macos:
+  build:
+    name: Build on macos-latest
     runs-on: macos-latest
-    needs: check_skip_flags_macos_latest
+    needs: check_skip_flags
     # https://stackoverflow.com/a/67532120/6055233
     # https://github.com/AllanChain/test-action-if/blob/main/.github/workflows/test-if.yml
     if: >-
       ${{
-        (!contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP ALL]') &&
-        !contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP MACOS]')) ||
-        contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[ENABLE MACOS]')
+        (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
+        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP MACOS]')) ||
+        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE MACOS]')
       }}
 
     # if: ${{ !contains(github.event.head_commit.message, '[SKIP MACOS]') && !contains(github.event.workflow_run.head_commit.message, '[SKIP MACOS]') }}
