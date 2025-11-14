@@ -44,6 +44,7 @@ jobs:
             target: Z13
             endianness: (Big Endian)
 
+    if: ${{ !contains(github.event.head_commit.message, '[SKIP OTHER-ARCH]') && !contains(github.event.workflow_run.head_commit.message, '[SKIP OTHER-ARCH]') }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -54,6 +55,12 @@ jobs:
         echo "github.ref: ${{ github.ref }}"
         echo "github.event.head_commit: ${{ github.event.head_commit }}"
         echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
+        echo "github.event.workflow_run.head_commit.message: ${{ github.event.workflow_run.head_commit.message }}"
+
+    - name: Logging
+      run: |
+        echo "github.event:\n"
+        echo "${{ toJSON(github.event) }}"
 
     - name: Run on arch
       uses: uraimo/run-on-arch-action@v3
