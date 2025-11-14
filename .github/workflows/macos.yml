@@ -32,7 +32,10 @@ jobs:
   build-macos:
     runs-on: macos-latest
     needs: check_skip_flags_macos_latest
-    if: ${{ (!contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP ALL]') && !contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP MACOS]')) || contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[ENABLE MACOS]') }}
+    if: >
+      ${{ (!contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP ALL]') &&
+      !contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP MACOS]')) ||
+      contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[ENABLE MACOS]') }}
     # if: >
     #   ${{ (!contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP ALL]') &&
     #   !contains(needs.check_skip_flags_macos_latest.outputs.head-commit-message, '[SKIP MACOS]')) ||
