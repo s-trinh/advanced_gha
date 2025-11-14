@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check_skip_flags:
+  check_skip_flags_other_arch:
     name: Check skip flags
     runs-on: ubuntu-latest
     outputs:
@@ -34,11 +34,11 @@ jobs:
     # The host should always be linux
     runs-on: ubuntu-latest
     name: Build on ${{ matrix.distro }} ${{ matrix.arch }} ${{ matrix.endianness }}
-    needs: check_skip_flags
-    if: |
-      ${{ (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
-      !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) ||
-       contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE OTHER-ARCH]')}}
+    needs: check_skip_flags_other_arch
+    if: >
+      ${{ (!contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP ALL]') &&
+      !contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) ||
+       contains(needs.check_skip_flags_other_arch.outputs.head-commit-message, '[ENABLE OTHER-ARCH]') }}
 
     # Run steps on a matrix of different arch/distro combinations
     strategy:
