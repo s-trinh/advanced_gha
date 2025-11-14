@@ -1,0 +1,120 @@
+name: Other-architectures
+
+# https://www.jeffgeerling.com/blog/2020/running-github-actions-workflow-on-schedule-and-other-events
+# https://github.com/uraimo/run-on-arch-action
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches:
+      - main
+
+# https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre#comment133398800_72408109
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-other-architectures:
+    # The host should always be linux
+    runs-on: ubuntu-latest
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }} ${{ matrix.endianness }}
+
+    # Run steps on a matrix of different arch/distro combinations
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # - arch: armv6
+          #   distro: bullseye
+          #   target: ARMV6
+          # - arch: armv7
+          #   distro: ubuntu20.04
+          #   target: ARMV7
+          # - arch: aarch64
+          #   distro: ubuntu:latest
+          #   target: ARMV8
+          #   endianness: (Little Endian)
+          # - arch: ppc64le
+          #   distro: ubuntu20.04
+          #   target: POWER8
+          - arch: s390x
+            distro: ubuntu:latest
+            target: Z13
+            endianness: (Big Endian)
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run on arch
+      uses: uraimo/run-on-arch-action@v3
+      # See issue https://github.com/uraimo/run-on-arch-action/issues/155 for the explanation on the weird use of the arch and distro
+      # that resulted in error
+      # ERROR: failed to solve: ${arch}/ubuntu:latest: failed to resolve source metadata for docker.io/${arch}/ubuntu:latest: no match for platform in manifest: not found
+      with:
+        githubToken: ${{ github.token }}
+        arch: none
+        distro: none
+        base_image: "--platform=linux/${{ matrix.arch }} ${{ matrix.distro }}"
+
+        install: |
+          apt-get update && apt-get install -y lsb-release git build-essential cmake gfortran liblapack-dev libeigen3-dev bsdmainutils xxd python3-numpy
+
+        run: |
+          current_dir=$(pwd)
+          lscpu
+          lsb_release -a
+
+          pwd
+          echo $GITHUB_WORKSPACE
+          GIT_ADDRESS=https://github.com/s-trinh/visp.git
+
+          git clone -b feat_cnpy_big_endian_support --depth 1 ${GIT_ADDRESS} ${HOME}/visp
+          cd ${HOME}/visp
+          mkdir build && cd build
+
+          cmake .. \
+            -DBUILD_APPS=OFF -DBUILD_DEMOS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_TUTORIALS=OFF \
+            -DBUILD_JAVA=OFF -DBUILD_MODULE_visp_java=OFF -DBUILD_MODULE_visp_java_binding=OFF -DBUILD_MODULE_visp_java_bindings_generator=OFF \
+            -DBUILD_MODULE_visp_klt=OFF -DBUILD_MODULE_visp_mbt=OFF  -DBUILD_MODULE_visp_tt=OFF  -DBUILD_MODULE_visp_tt_mi=OFF \
+            -DBUILD_MODULE_visp_me=OFF -DBUILD_MODULE_visp_sensor=OFF -DBUILD_MODULE_visp_ar=OFF -DBUILD_MODULE_visp_blob=OFF \
+            -DBUILD_MODULE_visp_robot=OFF -DBUILD_MODULE_visp_visual_features=OFF -DBUILD_MODULE_visp_vs=OFF -DBUILD_MODULE_visp_vision=OFF \
+            -DBUILD_MODULE_visp_gui=OFF -DBUILD_MODULE_visp_imgproc=OFF -DBUILD_MODULE_visp_detection=OFF \
+            -DWITH_APRILTAG=OFF -DWITH_POLOLU=OFF -DWITH_QBDEVICE=OFF -DWITH_TAKKTILE2=OFF -DWITH_SIMDLIB=OFF
+          cat ViSP-third-party.txt
+          make install
+
+          cd ${current_dir}
+          pwd
+          mkdir build && cd build
+          cmake ..
+          make
+
+          printf '\n\n===ViSP-images data with cnpy===\n'
+          printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
+          ./print_npz_simple -i visp_npz_test_data_cnpy_LE.npz
+
+          printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
+          ./print_npz_simple -i visp_npz_test_data_cnpy_BE.npz
+
+          printf '\n\n**npz/numpy/visp_npz_test_data_numpy_LE.npz**\n'
+          ./print_npz_simple -i visp_npz_test_data_numpy_LE.npz
+
+          printf '\n\n**npz/numpy/visp_npz_test_data_numpy_BE.npz**\n'
+          ./print_npz_simple -i visp_npz_test_data_numpy_BE.npz
+
+
+          printf '\n\n===ViSP-images data with NumPy===\n'
+          printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
+          python print_npz.py -i visp_npz_test_data_cnpy_LE.npz
+
+          printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
+          python print_npz.py -i visp_npz_test_data_cnpy_BE.npz
+
+          printf '\n\n**npz/numpy/visp_npz_test_data_numpy_LE.npz**\n'
+          python print_npz.py -i visp_npz_test_data_numpy_LE.npz
+
+          printf '\n\n**npz/numpy/visp_npz_test_data_numpy_BE.npz**\n'
+          python print_npz.py -i visp_npz_test_data_numpy_BE.npz
