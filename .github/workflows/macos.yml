@@ -32,7 +32,10 @@ jobs:
   build-macos:
     runs-on: macos-latest
     needs: check_skip_flags
-    if: ${{ !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP MACOS]') }}
+    if: |
+      ${{ (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
+      !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP MACOS]')) ||
+       contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE MACOS]')}}
 
     # if: ${{ !contains(github.event.head_commit.message, '[SKIP MACOS]') && !contains(github.event.workflow_run.head_commit.message, '[SKIP MACOS]') }}
     steps:
