@@ -57,6 +57,17 @@ jobs:
         key: ${{ github.job }}-${{ matrix.os }}
         verbose: 2
 
+    - name: Print GitHub variables
+      run: |
+        echo "github.job: ${{ github.job }}"
+        echo "github.workflow: ${{ github.workflow }}"
+        echo "github.job-matrix.os: ${{ github.job }}-${{ matrix.os }}"
+        echo "github.workflow-matrix.os: ${{ github.workflow }}-${{ matrix.os }}"
+        echo "github.ref: ${{ github.ref }}"
+        echo "github.event.head_commit: ${{ github.event.head_commit }}"
+        echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
+        echo "github.event.workflow_run.head_commit.message: ${{ github.event.workflow_run.head_commit.message }}"
+
     - name: Print system information
       run: lscpu
 
