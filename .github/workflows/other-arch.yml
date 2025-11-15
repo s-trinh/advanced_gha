@@ -16,10 +16,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-other-architectures:
+  check_skip_flags:
+    name: Check skip flags
+    runs-on: ubuntu-latest
+    outputs:
+      head-commit-message: ${{ steps.get_head_commit_message.outputs.headCommitMsg }}
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Print head git commit message
+        id: get_head_commit_message
+        run: echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
+
+  build:
     # The host should always be linux
     runs-on: ubuntu-latest
-    name: Build on ${{ matrix.distro }} ${{ matrix.arch }} ${{ matrix.endianness }}
+    name: Build on ubuntu-latest
+    needs: check_skip_flags
+    if: >-
+      ${{
+        (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
+        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP OTHER-ARCH]')) ||
+        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE OTHER-ARCH]')
+      }}
 
     # Run steps on a matrix of different arch/distro combinations
     strategy:
@@ -46,7 +67,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Print GitHub variables
       run: |
@@ -54,6 +75,12 @@ jobs:
         echo "github.ref: ${{ github.ref }}"
         echo "github.event.head_commit: ${{ github.event.head_commit }}"
         echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
+        echo "github.event.workflow_run.head_commit.message: ${{ github.event.workflow_run.head_commit.message }}"
+
+    - name: Logging
+      run: |
+        echo "github.event:\n"
+        echo "${{ toJSON(github.event) }}"
 
     - name: Run on arch
       uses: uraimo/run-on-arch-action@v3

@@ -15,19 +15,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-macos:
+  # https://github.com/orgs/community/discussions/28474#discussioncomment-3350256
+  check_skip_flags:
+    name: Check skip flags
     runs-on: macos-latest
+    outputs:
+      head-commit-message: ${{ steps.get_head_commit_message.outputs.headCommitMsg }}
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Print head git commit message
+        id: get_head_commit_message
+        run: echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build on macos-latest
+    runs-on: macos-latest
+    needs: check_skip_flags
+    # https://stackoverflow.com/a/67532120/6055233
+    # https://github.com/AllanChain/test-action-if/blob/main/.github/workflows/test-if.yml
+    if: >-
+      ${{
+        (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
+        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP MACOS]')) ||
+        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE MACOS]')
+      }}
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Print GitHub variables
       run: |
+        echo "github.job: ${{ github.job }}"
         echo "github.workflow: ${{ github.workflow }}"
+        echo "github.job-matrix.os: ${{ github.job }}-${{ matrix.os }}"
+        echo "github.workflow-matrix.os: ${{ github.workflow }}-${{ matrix.os }}"
         echo "github.ref: ${{ github.ref }}"
         echo "github.event.head_commit: ${{ github.event.head_commit }}"
         echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
+        echo "github.event.workflow_run.head_commit.message: ${{ github.event.workflow_run.head_commit.message }}"
+
+    - name: Logging
+      run: |
+        echo "github.event:\n"
+        echo "${{ toJSON(github.event) }}"
 
     - name: Print system information
       run: |
@@ -41,6 +75,7 @@ jobs:
       run: |
         brew install pkg-config cmake gcc python numpy
         brew list
+        pip install numpy
 
     - name: Build ViSP from source
       run: |
