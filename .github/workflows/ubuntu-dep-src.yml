@@ -30,7 +30,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Print head git commit message
         id: get_head_commit_message
-        run: echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
+        run: |
+          echo "headCommitMsg=$(git show -s --format=%s)"
+          echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
 
   build:
     name: Build on ubuntu-dep-src
@@ -55,6 +57,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2.19
       with:
         key: ${{ github.job }}-${{ matrix.os }}
+        restore-keys: ${{ github.job }}-${{ matrix.os }}
         verbose: 2
 
     - name: Print GitHub variables
