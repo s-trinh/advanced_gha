@@ -60,10 +60,10 @@ jobs:
         echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
         echo "github.event.workflow_run.head_commit.message: ${{ github.event.workflow_run.head_commit.message }}"
 
-    - name: Logging
-      run: |
-        echo "github.event:\n"
-        echo "${{ toJSON(github.event) }}"
+    # - name: Logging
+    #   run: |
+    #     echo "github.event:\n"
+    #     echo "${{ toJSON(github.event) }}"
 
     - name: Print system information
       run: |
