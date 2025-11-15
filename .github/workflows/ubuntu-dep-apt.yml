@@ -22,14 +22,12 @@ jobs:
       head-commit-message: ${{ steps.get_head_commit_message.outputs.headCommitMsg }}
     steps:
       - name: Get repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Print head git commit message
         id: get_head_commit_message
-        run: |
-          # echo "::set-output name=headCommitMsg::$(git show -s --format=%s)"
-          echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
+        run: echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
 
   build:
     name: Build on ubuntu-latest
@@ -42,10 +40,9 @@ jobs:
         contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE UBUNTU-DEP-APT]')
       }}
 
-    # if: ${{ !contains(github.event.head_commit.message, '[SKIP UBUNTU-DEP-APT]') && !contains(github.event.workflow_run.head_commit.message, '[SKIP UBUNTU-DEP-APT]') }}
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Get Head Commit Message
       id: get_head_commit_message
