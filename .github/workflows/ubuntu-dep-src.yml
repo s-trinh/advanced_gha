@@ -39,8 +39,8 @@ jobs:
     if: >-
       ${{
         (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
-        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP UBUNTU-DEP-APT]')) ||
-        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE UBUNTU-DEP-APT]')
+        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP UBUNTU-DEP-SRC]')) ||
+        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE UBUNTU-DEP-SRC]')
       }}
     strategy:
       fail-fast: false
@@ -85,7 +85,6 @@ jobs:
         cd ${HOME}/ogre
         mkdir build && cd build && mkdir install
         cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         make -j$(nproc) install
         echo "OGRE_DIR=$(pwd)/install" >> $GITHUB_ENV
         echo $OGRE_DIR
@@ -100,7 +99,6 @@ jobs:
         git clone --depth 1 --branch ${LATEST_TAG} ${GIT_ADDRESS} ${HOME}/OpenBLAS
         cd ${HOME}/OpenBLAS
         mkdir install
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         make -j$(nproc)
         make -j$(nproc) install PREFIX=$(pwd)/install
         echo "OpenBLAS_HOME=$(pwd)/install" >> $GITHUB_ENV
@@ -122,7 +120,6 @@ jobs:
         cmake .. -DVTK_ANDROID_BUILD=OFF -DVTK_BUILD_DOCUMENTATION=OFF -DVTK_BUILD_EXAMPLES=OFF -DVTK_BUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release \
           -DVTK_GROUP_ENABLE_Imaging=DONT_WANT -DVTK_GROUP_ENABLE_MPI=DONT_WANT -DVTK_GROUP_ENABLE_Web=DONT_WANT -DCMAKE_INSTALL_PREFIX=$(pwd)/install \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         make -j$(nproc) install
         echo "VTK_DIR=$(pwd)/install" >> $GITHUB_ENV
         echo $VTK_DIR
@@ -138,7 +135,6 @@ jobs:
         mkdir build && cd build && mkdir install
         cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(pwd)/install \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         make -j$(nproc) install
         echo "OpenCV_DIR=$(pwd)/install" >> $GITHUB_ENV
         echo $OpenCV_DIR
@@ -154,7 +150,6 @@ jobs:
         mkdir build && cd build && mkdir install
         cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_GRAPHICAL_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(pwd)/install \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         make -j$(nproc) install
         echo "REALSENSE2_DIR=$(pwd)/install" >> $GITHUB_ENV
         echo $REALSENSE2_DIR
@@ -170,7 +165,6 @@ jobs:
         mkdir build && cd build && mkdir install
         cmake .. -DBUILD_tools=OFF -DBUILD_global_tests=OFF -DPCL_DISABLE_GPU_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(pwd)/install \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS=-mno-avx512f -DCMAKE_C_FLAGS=-mno-avx512f
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         make -j$(nproc) install
         echo "PCL_DIR=$(pwd)/install" >> $GITHUB_ENV
         echo $PCL_DIR
