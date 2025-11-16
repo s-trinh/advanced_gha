@@ -58,7 +58,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2.19
       with:
         key: ${{ github.job }}-${{ matrix.os }}
-        append-timestamp: false
+        append-timestamp: false # https://github.com/hendrikmuhs/ccache-action/blob/main/action.yml
         verbose: 2
 
     - name: Print GitHub variables
