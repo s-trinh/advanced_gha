@@ -4,12 +4,12 @@ name: Ubuntu-dep-src
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   schedule:
     # Test if PR reuses artifacts from scheduled job in the main branch
-    - cron: "0 0 * * *" # Runs every day at 00:00 UTC
+    - cron: "0 6 * * *" # Runs every day at UTC
 
 # https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre#comment133398800_72408109
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
