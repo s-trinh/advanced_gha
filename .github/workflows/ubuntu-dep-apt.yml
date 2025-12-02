@@ -114,6 +114,11 @@ jobs:
         ls -al /usr/lib/x86_64-linux-gnu/lapack/
       # dpkg -L libblas-dev
 
+    - name: FIX
+      run: |
+        sudo ln -sf /usr/lib/x86_64-linux-gnu/blas/libblas.so.3 /usr/lib/x86_64-linux-gnu/libblas.so.3
+        sudo ln -sf /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3 /usr/lib/x86_64-linux-gnu/liblapack.so.3
+
     # - name: Install dependencies
     #   run: |
     #     sudo apt-get update
