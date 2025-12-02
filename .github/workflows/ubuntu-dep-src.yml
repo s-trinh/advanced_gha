@@ -116,7 +116,10 @@ jobs:
     #
 
     - name: Pring BLAS
-      run: dpkg -L libblas-dev
+      run: |
+        ls -al /usr/lib/x86_64-linux-gnu/blas/
+        ls -al /usr/lib/x86_64-linux-gnu/lapack/
+      # dpkg -L libblas-dev
 
     # - name: Install common dependencies for ubuntu
     #   run: |
