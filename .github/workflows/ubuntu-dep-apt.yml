@@ -89,8 +89,27 @@ jobs:
     - name: Restore apt cache
       uses: awalsh128/cache-apt-pkgs-action@latest
       with:
-        packages: git build-essential cmake python3-numpy libopenblas-dev
+        packages: |
+          git build-essential cmake python3-numpy
+          libopenblas-dev
+          libblas-dev liblapack-dev
         version: 1.0
+    # issue with NumPy
+    #
+    # https://stackoverflow.com/questions/75414336/libblas-so-3-cannot-open-shared-object-file-no-such-file-or-directory-but-it
+    # **npz/cnpy/visp_npz_test_data_cnpy_LE.npz**
+    # Traceback (most recent call last):
+    #   File "/usr/lib/python3/dist-packages/numpy/core/__init__.py", line 24, in <module>
+    #     from . import multiarray
+    #   File "/usr/lib/python3/dist-packages/numpy/core/multiarray.py", line 10, in <module>
+    #     from . import overrides
+    #   File "/usr/lib/python3/dist-packages/numpy/core/overrides.py", line 8, in <module>
+    #     from numpy.core._multiarray_umath import (
+    # ImportError: libblas.so.3: cannot open shared object file: No such file or directory
+    #
+
+    - name: Pring BLAS
+      run: dpkg -L libblas-dev
 
     # - name: Install dependencies
     #   run: |
