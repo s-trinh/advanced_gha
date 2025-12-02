@@ -88,7 +88,7 @@ jobs:
     - name: Restore apt cache
       uses: awalsh128/cache-apt-pkgs-action@latest
       with:
-        packages: git build-essential cmake python3-numpy
+        packages: git build-essential cmake python3-numpy libopenblas-dev
         version: 1.0
 
     # - name: Install dependencies
