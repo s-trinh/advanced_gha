@@ -76,10 +76,16 @@ jobs:
     - name: Print compiler information
       run: dpkg --list | grep compiler
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git build-essential cmake python3-numpy
+    - name: Restore apt cache
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: git build-essential cmake python3-numpy
+        version: 1.0
+
+    # - name: Install dependencies
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y git build-essential cmake python3-numpy
 
     - name: Build ViSP from source
       run: |
