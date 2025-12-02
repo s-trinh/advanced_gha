@@ -46,6 +46,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    # https://github.com/CrowdStrike/glide-core/pull/1113/files
+    # https://github.com/actions/runner-images/issues/7048
+    - name: Change Mirror Priorities
+      run: |
+        sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
+        sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
+        sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
+        sudo cat /etc/apt/apt-mirrors.txt
+
     - name: Get Head Commit Message
       id: get_head_commit_message
       run: |
