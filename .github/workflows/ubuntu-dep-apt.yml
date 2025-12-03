@@ -46,6 +46,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    # https://github.com/CrowdStrike/glide-core/pull/1113/files
+    # https://github.com/actions/runner-images/issues/7048
+    - name: Change Mirror Priorities
+      run: |
+        sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
+        sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
+        sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
+        sudo cat /etc/apt/apt-mirrors.txt
+
     - name: Get Head Commit Message
       id: get_head_commit_message
       run: |
@@ -76,10 +85,48 @@ jobs:
     - name: Print compiler information
       run: dpkg --list | grep compiler
 
-    - name: Install dependencies
+    # https://github.com/awalsh128/cache-apt-pkgs-action
+    - name: Restore apt cache
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: |
+          git build-essential cmake python3-numpy
+          libopenblas-dev
+          libblas-dev liblapack-dev
+        version: 1.0
+    # issue with NumPy, try installing libblas-dev liblapack-dev packages
+    #
+    # https://stackoverflow.com/questions/75414336/libblas-so-3-cannot-open-shared-object-file-no-such-file-or-directory-but-it
+    # **npz/cnpy/visp_npz_test_data_cnpy_LE.npz**
+    # Traceback (most recent call last):
+    #   File "/usr/lib/python3/dist-packages/numpy/core/__init__.py", line 24, in <module>
+    #     from . import multiarray
+    #   File "/usr/lib/python3/dist-packages/numpy/core/multiarray.py", line 10, in <module>
+    #     from . import overrides
+    #   File "/usr/lib/python3/dist-packages/numpy/core/overrides.py", line 8, in <module>
+    #     from numpy.core._multiarray_umath import (
+    # ImportError: libblas.so.3: cannot open shared object file: No such file or directory
+    #
+
+    - name: Print lib
       run: |
-        sudo apt-get update
-        sudo apt-get install -y git build-essential cmake python3-numpy
+        ls -al /usr/lib/x86_64-linux-gnu/
+
+    - name: Print BLAS
+      run: |
+        ls -al /usr/lib/x86_64-linux-gnu/blas/
+        ls -al /usr/lib/x86_64-linux-gnu/lapack/
+      # dpkg -L libblas-dev
+
+    - name: FIX
+      run: |
+        sudo ln -sf /usr/lib/x86_64-linux-gnu/blas/libblas.so.3 /usr/lib/x86_64-linux-gnu/libblas.so.3
+        sudo ln -sf /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3 /usr/lib/x86_64-linux-gnu/liblapack.so.3
+
+    # - name: Install dependencies
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y git build-essential cmake python3-numpy
 
     - name: Build ViSP from source
       run: |
