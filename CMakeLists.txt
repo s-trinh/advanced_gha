@@ -6,6 +6,7 @@ find_package(VISP REQUIRED visp_core visp_io)
 
 set(code_cpp
   src/print_npz_simple.cpp
+  src/debug_ViSP_Canny_determinism.cpp
 )
 
 foreach(cpp ${code_cpp})
@@ -22,6 +23,9 @@ file(COPY
     # NumPy
     ${CMAKE_SOURCE_DIR}/npz/numpy/visp_npz_test_data_numpy_LE.npz
     ${CMAKE_SOURCE_DIR}/npz/numpy/visp_npz_test_data_numpy_BE.npz
+
+    # ViSP Canny issue
+    ${CMAKE_SOURCE_DIR}/data/MEF_img_0000.png
 
     DESTINATION ${CMAKE_BINARY_DIR}
 )
