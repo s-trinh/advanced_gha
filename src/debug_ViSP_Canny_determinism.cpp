@@ -48,11 +48,15 @@ int main(int, const char **)
   {
     vpCannyEdgeDetection cannyDetector(gaussianKernelSize, gaussianStdev, apertureSize,
                                 lowerThresh, upperThresh, lowerThreshRatio, upperThreshRatio,
-                                filteringType);
+                                filteringType, false, -1);
 
     vpImage<unsigned char> I_canny = cannyDetector.detect(I_gray);
     const double canny_mean = I_canny.getMeanValue();
     std::cout << "canny_mean=" << canny_mean << std::endl;
+
+    std::ostringstream oss;
+    oss << "I_canny_" << i << ".png";
+    vpImageIo::write(I_canny, oss.str());
   }
 
   return EXIT_SUCCESS;
