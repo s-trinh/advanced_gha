@@ -108,7 +108,13 @@ jobs:
     - name: Run
       working-directory: build
       run: |
-        printf '\n\n===DEBUG CANNY===\n'
+        printf '\n\n===DEBUG CANNY 1===\n'
         ./debug_ViSP_Canny_determinism
         ./debug_ViSP_Canny_determinism
         ./debug_ViSP_Canny_determinism
+
+
+        printf '\n\n===DEBUG CANNY 2===\n'
+        ./debug_ViSP_Canny_threading
+        ./debug_ViSP_Canny_threading
+        ./debug_ViSP_Canny_threading

@@ -7,6 +7,7 @@ find_package(VISP REQUIRED visp_core visp_io)
 set(code_cpp
   src/print_npz_simple.cpp
   src/debug_ViSP_Canny_determinism.cpp
+  src/debug_ViSP_Canny_threading.cpp
 )
 
 foreach(cpp ${code_cpp})
