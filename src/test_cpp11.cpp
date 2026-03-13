@@ -33,7 +33,11 @@
 #include <memory>
 
 #include <visp3/core/vpConfig.h>
-#include <visp3/core/vpImageTools.h>
+#include <visp3/core/vpMath.h>
+
+#if defined(ENABLE_VISP_NAMESPACE)
+using namespace VISP_NAMESPACE_NAME;
+#endif
 
 // https://stackoverflow.com/questions/1562074/how-do-i-show-the-value-of-a-define-at-compile-time/10791845#10791845
 #define XSTR(x) STR(x)
@@ -57,6 +61,8 @@ int main(int, const char **)
   const int val = 5;
   std::unique_ptr<int> ptr(new int(val));
   std::cout << "ptr=" << *ptr << std::endl;
+
+  vpMath::isInf(4.0);
 
   return EXIT_SUCCESS;
 }
