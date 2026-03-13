@@ -42,7 +42,7 @@ jobs:
         os: [ubuntu-22.04, ubuntu-latest]
         compiler: [ {CC: /usr/bin/gcc, CXX: /usr/bin/g++}, {CC: /usr/bin/clang, CXX: /usr/bin/clang++} ]
         standard: [ 98, 11, 17 ]
-        ogre: [ogre-1.9, ogre-1.12]
+        ogre: [ogre-1.9, ogre-1.12, no-ogre]
 
     steps:
     - name: Checkout repository
