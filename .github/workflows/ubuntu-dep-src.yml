@@ -4,9 +4,9 @@ name: Ubuntu-dep-src
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   schedule:
     # Test if PR reuses artifacts from scheduled job in the main branch
     - cron: "0 6 * * *" # Runs every day at UTC
@@ -197,7 +197,7 @@ jobs:
         GIT_ADDRESS="https://github.com/opencv/opencv.git"
         LATEST_TAG=`eval ${FUNCTION_GET_LATEST}`
         echo "Newest tag is ${LATEST_TAG}"
-        git clone --depth 1 --branch ${LATEST_TAG} ${GIT_ADDRESS} ${HOME}/opencv
+        git clone --depth 1 --branch 4.13.0 ${GIT_ADDRESS} ${HOME}/opencv
         cd ${HOME}/opencv
         mkdir build && cd build && mkdir install
         cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(pwd)/install \
