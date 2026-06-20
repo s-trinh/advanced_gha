@@ -56,7 +56,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v7
 
     # https://github.com/CrowdStrike/glide-core/pull/1113/files
     # https://github.com/actions/runner-images/issues/7048
