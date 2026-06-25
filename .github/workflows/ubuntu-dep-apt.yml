@@ -4,9 +4,6 @@ name: Ubuntu-dep-apt
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-  push:
-    branches:
-      - main
 
 # https://stackoverflow.com/questions/66335225/how-to-cancel-previous-runs-in-the-pr-when-you-push-new-commitsupdate-the-curre#comment133398800_72408109
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
@@ -15,6 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # https://github.com/orgs/community/discussions/28474#discussioncomment-3350256
   check_skip_flags:
     name: Check skip flags
     runs-on: ubuntu-latest
@@ -27,54 +25,28 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Print head git commit message
         id: get_head_commit_message
-        run: |
-          echo "headCommitMsg=$(git show -s --format=%s)"
-          echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
+        run: echo "headCommitMsg=$(git show -s --format=%s)" >> $GITHUB_OUTPUT
 
-  build:
-    name: Build on ubuntu-latest
-    runs-on: ubuntu-latest
+  build-ubuntu-dep-apt:
+    runs-on: ${{ matrix.os }}
     needs: check_skip_flags
     if: >-
       ${{
-        (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP ALL]') &&
-        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP UBUNTU-DEP-APT]')) ||
-        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE UBUNTU-DEP-APT]')
+        (!contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP-CI ALL]') &&
+        !contains(needs.check_skip_flags.outputs.head-commit-message, '[SKIP-CI UBUNTU-DEP-APT]')) ||
+        contains(needs.check_skip_flags.outputs.head-commit-message, '[ENABLE-CI UBUNTU-DEP-APT]')
       }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        compiler: [ {CC: /usr/bin/gcc, CXX: /usr/bin/g++}, {CC: /usr/bin/clang, CXX: /usr/bin/clang++} ]
+        standard: [ 98, 11 ]
+        ogre: [no-ogre, ogre-1.9, ogre-1.12]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
-
-    # https://github.com/CrowdStrike/glide-core/pull/1113/files
-    # https://github.com/actions/runner-images/issues/7048
-    - name: Change Mirror Priorities
-      run: |
-        sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
-        sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
-        sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
-        sudo cat /etc/apt/apt-mirrors.txt
-
-    - name: Get Head Commit Message
-      id: get_head_commit_message
-      run: |
-        echo "HEAD_COMMIT_MESSAGE=$(git show -s --format=%s)" >> "$GITHUB_OUTPUT"
-
-    - name: Print GitHub variables
-      run: |
-        echo "github.job: ${{ github.job }}"
-        echo "github.workflow: ${{ github.workflow }}"
-        echo "github.job-matrix.os: ${{ github.job }}-${{ matrix.os }}"
-        echo "github.workflow-matrix.os: ${{ github.workflow }}-${{ matrix.os }}"
-        echo "github.ref: ${{ github.ref }}"
-        echo "github.event.head_commit: ${{ github.event.head_commit }}"
-        echo "github.event.head_commit.message: ${{ github.event.head_commit.message }}"
-        echo "github.event.workflow_run.head_commit.message: ${{ github.event.workflow_run.head_commit.message }}"
-
-    # - name: Logging
-    #   run: |
-    #     echo "github.event:\n"
-    #     echo "${{ toJSON(github.event) }}"
 
     - name: Print system information
       run: lscpu
@@ -83,68 +55,56 @@ jobs:
       run: lsb_release -a
 
     - name: Print compiler information
-      run: dpkg --list | grep compiler
-
-    # https://github.com/awalsh128/cache-apt-pkgs-action
-    - name: Restore apt cache
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: |
-          git build-essential cmake python3-numpy
-          libopenblas-dev
-          libblas-dev liblapack-dev
-        version: 1.0
-    # issue with NumPy, try installing libblas-dev liblapack-dev packages
-    #
-    # https://stackoverflow.com/questions/75414336/libblas-so-3-cannot-open-shared-object-file-no-such-file-or-directory-but-it
-    # **npz/cnpy/visp_npz_test_data_cnpy_LE.npz**
-    # Traceback (most recent call last):
-    #   File "/usr/lib/python3/dist-packages/numpy/core/__init__.py", line 24, in <module>
-    #     from . import multiarray
-    #   File "/usr/lib/python3/dist-packages/numpy/core/multiarray.py", line 10, in <module>
-    #     from . import overrides
-    #   File "/usr/lib/python3/dist-packages/numpy/core/overrides.py", line 8, in <module>
-    #     from numpy.core._multiarray_umath import (
-    # ImportError: libblas.so.3: cannot open shared object file: No such file or directory
-    #
-
-    - name: Print lib
       run: |
-        ls -al /usr/lib/x86_64-linux-gnu/
+        dpkg --list | grep compiler
+        ls /usr/bin/
 
-    - name: Print BLAS
+    - name: Install dependencies
       run: |
-        ls -al /usr/lib/x86_64-linux-gnu/blas/
-        ls -al /usr/lib/x86_64-linux-gnu/lapack/
-      # dpkg -L libblas-dev
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libdc1394-dev libv4l-dev liblapack-dev libopenblas-dev libeigen3-dev
+        sudo apt-get install -y libopencv-dev nlohmann-json3-dev libcomedi-dev libjpeg-dev libpng-dev libcoin-dev
+        sudo apt-get install -y libfreenect-dev libpcl-dev
 
-    - name: FIX
-      run: |
-        sudo ln -sf /usr/lib/x86_64-linux-gnu/blas/libblas.so.3 /usr/lib/x86_64-linux-gnu/libblas.so.3
-        sudo ln -sf /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3 /usr/lib/x86_64-linux-gnu/liblapack.so.3
+    - name: Install Ogre 1.9
+      if: matrix.ogre == 'ogre-1.9' && matrix.standard != '17'
+      run: sudo apt-get install -y libogre-1.9-dev
 
-    # - name: Install dependencies
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -y git build-essential cmake python3-numpy
+    - name: Install Ogre 1.12
+      if: matrix.ogre == 'ogre-1.12'
+      run: sudo apt-get install -y libogre-1.12-dev
 
     - name: Build ViSP from source
       run: |
         pwd
+        ls -l
         echo $GITHUB_WORKSPACE
         GIT_ADDRESS=https://github.com/s-trinh/visp.git
 
-        git clone -b feat_cnpy_big_endian_support --depth 1 ${GIT_ADDRESS} ${HOME}/visp
+        git clone -b test_ci_cpp98 --depth 1 ${GIT_ADDRESS} ${HOME}/visp
         cd ${HOME}/visp
         mkdir build && cd build
 
-        cmake .. -DBUILD_APPS=OFF -DBUILD_DEMOS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_TUTORIALS=OFF -DBUILD_JAVA=OFF \
+        CC=${{ matrix.compiler.CC }}
+        CXX=${{ matrix.compiler.CXX }}
+        CXX_STANDARD=${{ matrix.standard }}
+        echo "CC: $CC"
+        echo "CXX: $CXX"
+        echo "Standard: $CXX_STANDARD"
+
+        cmake .. -DCMAKE_C_COMPILER="${CC}" -DCMAKE_CXX_COMPILER="${CXX}" -DUSE_CXX_STANDARD=$CXX_STANDARD \
+                 -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release \
+                 -DBUILD_APPS=ON -DBUILD_DEMOS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_TUTORIALS=OFF -DBUILD_JAVA=OFF \
                  -DBUILD_MODULE_visp_java=OFF -DBUILD_MODULE_visp_java_binding=OFF
+
         cat ViSP-third-party.txt
         sudo make -j$(nproc) install
+        ./apps/calibration/intrinsic/visp-calibrate-camera
 
     - name: Configure CMake
       run: |
+        pwd
+        ls -l
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -157,29 +117,4 @@ jobs:
     - name: Run
       working-directory: build
       run: |
-        printf '\n\n===ViSP-images data with cnpy===\n'
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_cnpy_LE.npz
-
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_cnpy_BE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_LE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_numpy_LE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_BE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_numpy_BE.npz
-
-
-        printf '\n\n===ViSP-images data with NumPy===\n'
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_cnpy_LE.npz
-
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_cnpy_BE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_LE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_numpy_LE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_BE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_numpy_BE.npz
+        ./test_cpp11

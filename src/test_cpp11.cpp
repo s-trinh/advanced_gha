@@ -1,0 +1,68 @@
+/*
+ * ViSP, open source Visual Servoing Platform software.
+ * Copyright (C) 2005 - 2025 by Inria. All rights reserved.
+ *
+ * This software is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * See the file LICENSE.txt at the root directory of this source
+ * distribution for additional information about the GNU GPL.
+ *
+ * For using ViSP with software that can not be combined with the GNU
+ * GPL, please contact Inria about acquiring a ViSP Professional
+ * Edition License.
+ *
+ * See https://visp.inria.fr for more information.
+ *
+ * This software was developed at:
+ * Inria Rennes - Bretagne Atlantique
+ * Campus Universitaire de Beaulieu
+ * 35042 Rennes Cedex
+ * France
+ *
+ * If you have questions regarding the use of this file, please contact
+ * Inria at visp@inria.fr
+ *
+ * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ */
+
+#include <iostream>
+#include <memory>
+
+#include <visp3/core/vpConfig.h>
+#include <visp3/core/vpMath.h>
+
+#if defined(ENABLE_VISP_NAMESPACE)
+using namespace VISP_NAMESPACE_NAME;
+#endif
+
+// https://stackoverflow.com/questions/1562074/how-do-i-show-the-value-of-a-define-at-compile-time/10791845#10791845
+#define XSTR(x) STR(x)
+#define STR(x) #x
+
+#pragma message "The value of VISP_CXX_STANDARD: " XSTR(VISP_CXX_STANDARD)
+#pragma message "The value of VISP_CXX_STANDARD_11: " XSTR(VISP_CXX_STANDARD_11)
+#pragma message "The value of VISP_CXX_STANDARD_14: " XSTR(VISP_CXX_STANDARD_14)
+#pragma message "The value of VISP_CXX_STANDARD_17: " XSTR(VISP_CXX_STANDARD_17)
+
+int main(int, const char **)
+{
+#if (VISP_CXX_STANDARD < VISP_CXX_STANDARD_11)
+  std::cout << "Compiler with C++11 support is required." << std::endl;
+#else
+  // int val = 5;
+  // std::unique_ptr<int> ptr = std::make_unique<int>(val);
+  // std::cout << "ptr=" << *ptr << std::endl;
+#endif
+
+  const int val = 5;
+  std::unique_ptr<int> ptr(new int(val));
+  std::cout << "ptr=" << *ptr << std::endl;
+
+  vpMath::isInf(4.0);
+
+  return EXIT_SUCCESS;
+}
