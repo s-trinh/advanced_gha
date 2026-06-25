@@ -83,9 +83,9 @@ jobs:
       run: |
         pwd
         echo $GITHUB_WORKSPACE
-        GIT_ADDRESS=https://github.com/s-trinh/visp.git
+        GIT_ADDRESS=https://github.com/lagadic/visp.git
 
-        git clone -b feat_cnpy_big_endian_support --depth 1 ${GIT_ADDRESS} ${HOME}/visp
+        git clone --depth 1 ${GIT_ADDRESS} ${HOME}/visp
         cd ${HOME}/visp
         mkdir build && cd build
 
@@ -108,29 +108,13 @@ jobs:
     - name: Run
       working-directory: build
       run: |
-        printf '\n\n===ViSP-images data with cnpy===\n'
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_cnpy_LE.npz
-
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_cnpy_BE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_LE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_numpy_LE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_BE.npz**\n'
-        ./print_npz_simple -i visp_npz_test_data_numpy_BE.npz
+        printf '\n\n===DEBUG CANNY 1===\n'
+        ./debug_ViSP_Canny_determinism
+        ./debug_ViSP_Canny_determinism
+        ./debug_ViSP_Canny_determinism
 
 
-        printf '\n\n===ViSP-images data with NumPy===\n'
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_LE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_cnpy_LE.npz
-
-        printf '\n\n**npz/cnpy/visp_npz_test_data_cnpy_BE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_cnpy_BE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_LE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_numpy_LE.npz
-
-        printf '\n\n**npz/numpy/visp_npz_test_data_numpy_BE.npz**\n'
-        python print_npz.py -i visp_npz_test_data_numpy_BE.npz
+        printf '\n\n===DEBUG CANNY 2===\n'
+        ./debug_ViSP_Canny_threading
+        ./debug_ViSP_Canny_threading
+        ./debug_ViSP_Canny_threading
